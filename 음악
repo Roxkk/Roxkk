@@ -1,0 +1,76 @@
+dependencies:
+  flutter:
+    sdk: flutter
+  audioplayers: ^0.20.1
+import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Music Player',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: MusicPlayer(),
+    );
+  }
+}
+
+class MusicPlayer extends StatefulWidget {
+  @override
+  _MusicPlayerState createState() => _MusicPlayerState();
+}
+
+class _MusicPlayerState extends State<MusicPlayer> {
+  AudioPlayer audioPlayer = AudioPlayer();
+  String musicUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+  PlayerState playerState = PlayerState.STOPPED;
+
+  @override
+  void initState() {
+    super.initState();
+    audioPlayer.onPlayerStateChanged.listen((PlayerState state) {
+      setState(() {
+        playerState = state;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Music Player'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              playerState == PlayerState.PLAYING ? "Playing" : "Stopped",
+              style: TextStyle(fontSize: 20.0),
+            ),
+            SizedBox(height: 20.0),
+            ElevatedButton(
+              onPressed: () {
+                if (playerState == PlayerState.STOPPED) {
+                  audioPlayer.play(musicUrl, isLocal: false);
+                } else {
+                  audioPlayer.stop();
+                }
+              },
+              child: Text(playerState == PlayerState.STOPPED ? "Play" : "Stop"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
