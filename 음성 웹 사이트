@@ -1,0 +1,86 @@
+import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Voice Web Browser',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: VoiceWebBrowser(),
+    );
+  }
+}
+
+class VoiceWebBrowser extends StatefulWidget {
+  @override
+  _VoiceWebBrowserState createState() => _VoiceWebBrowserState();
+}
+
+class _VoiceWebBrowserState extends State<VoiceWebBrowser> {
+  final stt.SpeechToText _speechToText = stt.SpeechToText();
+  String _lastWords = '';
+
+  Future<void> _listen() async {
+    if (!_speechToText.isAvailable) return;
+
+    _speechToText.listen(
+      onResult: (result) {
+        setState(() {
+          _lastWords = result.recognizedWords.toLowerCase();
+        });
+      },
+    );
+  }
+
+  void _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Voice Web Browser'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('말로 웹사이트에 연결하세요.'),
+            SizedBox(height: 20),
+            Text(
+              '마지막으로 인식된 단어: $_lastWords',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _listen,
+              child: Text('음성으로 듣기'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                if (_lastWords.isNotEmpty) {
+                  _launchURL('https://www.$_lastWords.com');
+                }
+              },
+              child: Text('웹사이트로 이동'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
