@@ -1,0 +1,61 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Camera App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: CameraPage(),
+    );
+  }
+}
+
+class CameraPage extends StatefulWidget {
+  @override
+  _CameraPageState createState() => _CameraPageState();
+}
+
+class _CameraPageState extends State<CameraPage> {
+  File _imageFile;
+  final picker = ImagePicker();
+
+  Future<void> _takePhoto() async {
+    final pickedFile = await picker.getImage(source: ImageSource.camera);
+
+    setState(() {
+      if (pickedFile != null) {
+        _imageFile = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Camera App'),
+      ),
+      body: Center(
+        child: _imageFile == null
+            ? Text('사진을 찍어주세요.')
+            : Image.file(_imageFile),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _takePhoto,
+        tooltip: 'Take Photo',
+        child: Icon(Icons.camera),
+      ),
+    );
+  }
+}
